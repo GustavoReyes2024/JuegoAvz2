@@ -9,6 +9,11 @@ class Jugador:
         self.width = PLAYER_WIDTH; self.height = PLAYER_HEIGHT
         self.rect = pygame.Rect(x, y, self.width, self.height)
         self.personaje = personaje
+
+                # --- CREACIÓN DE LA HITBOX DEL JUGADOR ---
+        # Creamos una hitbox 10 píxeles más estrecha y 5 más baja que el rect principal
+        # El método inflate() quita de ambos lados, por lo que -10 quita 5 de la izq y 5 de la der.
+        self.hitbox = self.rect.inflate(-10, -5)
         
         self.animation_frames = {}; self.action = 'idle'; self.current_frame_index = 0
         self.last_animation_update = pygame.time.get_ticks()
@@ -128,6 +133,9 @@ class Jugador:
                 elif self.vel_x < 0: self.rect.left = plataforma.right
 
         self.rect.clamp_ip(pygame.Rect(0, 0, map_width, map_height))
+                # --- ACTUALIZACIÓN DE LA HITBOX ---
+        # Hacemos que la hitbox siga siempre al personaje
+        self.hitbox.center = self.rect.center
         self._handle_animation()
 
     def atacar(self, tipo):
@@ -179,25 +187,49 @@ class Jugador:
                 if self.sonidos_habilidad["Aria_Q"]: self.sonidos_habilidad["Aria_Q"].play()
 
     def tomar_danio(self, cantidad):
-        self.salud -= cantidad
+
+
+        # Usamos abs() para obtener el valor absoluto
+        cantidad_real = abs(cantidad)
+
+
+        self.salud -= cantidad_real
+
+
         male_characters = ["Prota", "Kael"]
         if self.personaje in male_characters:
             if self.sound_male_hit: self.sound_male_hit.play()
         else: 
             if self.sound_female_hit: self.sound_female_hit.play()
-        if self.salud < 0: self.salud = 0
+
+        if self.salud < 0:
+            self.salud = 0
 
     def dibujar(self, superficie, offset_x, offset_y, zoom):
-        destino = self.rect.copy();
-        destino.x = (self.rect.x - offset_x) * zoom;
-        destino.y = (self.rect.y - offset_y) * zoom;
-        destino.width = int(self.width * zoom);
-        destino.height = int(self.height * zoom)
-        
         if self.image:
             imagen_a_dibujar = self.image if self.facing_right else pygame.transform.flip(self.image, True, False)
-            superficie.blit(imagen_a_dibujar, destino)
-        
+            
+            # --- LÓGICA DE DIBUJADO CORREGIDA ---
+            # Calcula la posición y el tamaño final en pantalla aplicando el zoom
+            render_pos_x = (self.rect.x - offset_x) * zoom
+            render_pos_y = (self.rect.y - offset_y) * zoom
+            render_width = self.width * zoom
+            render_height = self.height * zoom
+            
+            # Dibuja el sprite escalado correctamente
+            if render_width > 0 and render_height > 0:
+                superficie.blit(pygame.transform.scale(imagen_a_dibujar, (render_width, render_height)), (render_pos_x, render_pos_y))
+
+        # --- Dibuja la hitbox de depuración ---
+        if hasattr(self, 'hitbox'):
+            debug_hitbox_rect = self.hitbox.copy()
+            debug_hitbox_rect.x = (self.hitbox.x - offset_x) * zoom
+            debug_hitbox_rect.y = (self.hitbox.y - offset_y) * zoom
+            debug_hitbox_rect.width *= zoom
+            debug_hitbox_rect.height *= zoom
+            pygame.draw.rect(superficie, (0, 255, 0), debug_hitbox_rect, 2) # Dibuja un rectángulo verde
+
+        # Dibuja los proyectiles del jugador
         for proyectil in self.proyectiles:
             if hasattr(proyectil, 'dibujar'):
                 proyectil.dibujar(superficie, offset_x, offset_y, zoom)

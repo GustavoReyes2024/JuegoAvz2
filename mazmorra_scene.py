@@ -20,9 +20,9 @@ class MazmorraScene(GameScene):
         
         # --- LISTA SIMPLIFICADA ---
         self.initial_enemies_data = [
-            (400, ground_y_mazmorra, 200, "lobo"),
-            (800, ground_y_mazmorra, 300, "lobo"),
-            (1300, ground_y_mazmorra, 250, "lobo"),
+            (400, ground_y_mazmorra-45, 200, "lobo"),
+            (800, ground_y_mazmorra-45, 300, "lobo"),
+            (1300, ground_y_mazmorra-45, 250, "lobo"),
         ]
         
         super().__init__(

@@ -9,24 +9,31 @@ from mazmorra_scene import MazmorraScene
 from levels_mazmorra.mazmorrap1 import MazmorraP1Scene
 from levels_mazmorra.mazmorrap2 import MazmorraP2Scene
 from levels_mazmorra.mazmorrap3 import MazmorraP3Scene
-from levels_mazmorra.mazmorra_jefe import MazmorraJefeScene
 from levels_mazmorra.mazmorrap4 import MazmorraP4Scene
+# --- CORRECCIÓN: SE ASEGURA DE QUE TODOS LOS NIVELES ESTÉN IMPORTADOS ---
 from levels_mazmorra.mazmorrap5 import MazmorraP5Scene
-# from levels_mazmorra.mazmorrap6 import MazmorraP6Scene # La añadiremos cuando la creemos
+from levels_mazmorra.mazmorra_jefe import MazmorraJefeScene
+from levels_mazmorra.mazmorrap6 import MazmorraP6Scene
+from levels_mazmorra.mazmorra_boss2 import MazmorraBoss2Scene
 from ui import LoadGameScreen
 
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Elemental Trinity")
 
-# --- Mapa de escenas actualizado ---
+# --- CORRECCIÓN: MAPA DE ESCENAS COMPLETO Y ACTUALIZADO ---
 scene_map = {
-    "bosque": BosqueScene, "aldea": AldeaScene, "mazmorra": MazmorraScene,
-    "mazmorra_p1": MazmorraP1Scene, "mazmorra_p2": MazmorraP2Scene,
-    "mazmorra_p3": MazmorraP3Scene, "mazmorra_jefe": MazmorraJefeScene,
+    "bosque": BosqueScene,
+    "aldea": AldeaScene,
+    "mazmorra": MazmorraScene,
+    "mazmorra_p1": MazmorraP1Scene,
+    "mazmorra_p2": MazmorraP2Scene,
+    "mazmorra_p3": MazmorraP3Scene,
     "mazmorra_p4": MazmorraP4Scene,
-    "mazmorra_p5": MazmorraP5Scene, # <-- Escena añadida
-    # "mazmorra_p6": MazmorraP6Scene, # Lista para el futuroaaaa
+    "mazmorrap5": MazmorraP5Scene, # <-- Ahora sí está registrada
+    "mazmorra_p6": MazmorraP6Scene,
+    "mazmorra_jefe": MazmorraJefeScene,
+    "mazmorra_boss2": MazmorraBoss2Scene,
 }
 
 progreso_llave = [False, False, False]
@@ -43,9 +50,13 @@ def run_game_loop(start_scene_name, character, key_progress):
     next_scene_name = start_scene_name
 
     while next_scene_name:
+
+        
         current_scene_class = scene_map.get(next_scene_name)
+        
         if not current_scene_class:
-            print(f"ADVERTENCIA: Escena '{next_scene_name}' no encontrada en scene_map. Volviendo al menú."); break
+            print(f"ADVERTENCIA: Escena '{next_scene_name}' no encontrada en scene_map. Volviendo al menú.")
+            break
         
         current_scene = current_scene_class(screen)
         current_scene.set_key_progress(progreso_llave)

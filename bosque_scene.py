@@ -16,13 +16,13 @@ class BosqueScene(GameScene):
         bosque_checkpoints = []
         bosque_interactables = []
 
-        player_start = (100, ground_y - PLAYER_HEIGHT)
+        player_start = (100, ground_y - PLAYER_HEIGHT+10)
         
         # --- LISTA SIMPLIFICADA ---
         bosque_enemies = [
-            (400, ground_y, 300, "lobo"),
-            (1000, ground_y, 400, "lobo"),
-            (600, ground_y, 200, "esqueleto"),
+            (400, ground_y-50, 200, "lobo"),
+            (1000, ground_y-50, 600, "lobo"),
+            (600, ground_y, 600, "esqueleto"),
         ]
 
         super().__init__(

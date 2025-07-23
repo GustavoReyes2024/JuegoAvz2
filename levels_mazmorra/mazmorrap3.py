@@ -18,11 +18,11 @@ class MazmorraP3Scene(GameScene):
         # --- LISTA SIMPLIFICADA ---
         dungeon_enemies = [
             (400, ground_y, 200, "esqueleto"),
-            (800, ground_y, 300, "golem"),
-            (1200, ground_y, 250, "lobo"),
+            (800, ground_y, 300-20, "golem"),
+            (1200, ground_y-45, 250, "lobo"),
             (1600, ground_y, 200, "esqueleto"),
-            (2000, ground_y, 300, "golem"),
-            (2400, ground_y, 150, "lobo"),
+            (2000, ground_y, 300-20, "golem"),
+            (2400, ground_y-45, 150, "lobo"),
         ]
         
         super().__init__(

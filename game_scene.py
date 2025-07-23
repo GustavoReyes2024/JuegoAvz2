@@ -260,20 +260,19 @@ class GameScene:
             if hasattr(enemigo, 'is_dead') and enemigo.is_dead:
                 self.enemigos.remove(enemigo)
                 continue
-            
-            # --- LÓGICA DE DAÑO POR CONTACTO AJUSTADA ---
-            # Solo aplica daño si el enemigo tiene 'contact_damage' > 0 (definido en constants.py)
+              
+            # --- LÓGICA DE DAÑO POR CONTACTO ACTUALIZADA ---
+            # Ahora usa jugador.hitbox y enemigo.hitbox para más precisión
             if enemigo.contact_damage > 0:
-                if enemigo.salud > 0 and self.jugador.rect.colliderect(enemigo.rect):
+                if enemigo.salud > 0 and self.jugador.hitbox.colliderect(enemigo.hitbox):
                     self.jugador.tomar_danio(enemigo.contact_damage)
-                    colores_personaje = {"Prota": (150, 75, 0), "Lia": (0, 150, 255), "Kael": (0, 150, 50), "Aria": (255, 255, 0)}
-                    color_impacto = colores_personaje.get(self.jugador.personaje, (200, 20, 20))
-                    self.effects.append(HitSplat(self.jugador.rect.centerx, self.jugador.rect.centery, color_impacto))
-                    self.trigger_shake(duration=15, intensity=6)
+                    # ... (efectos de impacto)
             
+            # --- LÓGICA DE PROYECTILES DE ENEMIGOS ACTUALIZADA ---
             if hasattr(enemigo, 'proyectiles'):
                 for proyectil in enemigo.proyectiles[:]:
-                    if proyectil.activo and proyectil.rect.colliderect(self.jugador.rect):
+                    # Ahora usa jugador.hitbox
+                    if proyectil.activo and proyectil.rect.colliderect(self.jugador.hitbox):
                         self.jugador.tomar_danio(proyectil.danio)
                         proyectil.activo = False
         
@@ -283,9 +282,11 @@ class GameScene:
             if not effect.is_active: self.effects.remove(effect)
         for puzle_obj in self.interactables:
             puzle_obj.update()
-
+        # Añadimos una nueva variable de condición
+        self.transition_conditions_met = True 
+        
         # Transición de escena
-        if self.next_scene_name and self.jugador.rect.right >= self.map_width and not self.cambio_escena_activo:
+        if self.next_scene_name and self.jugador.rect.right >= self.map_width and not self.cambio_escena_activo and self.transition_conditions_met:
             self.running = False
             self.cambio_escena_activo = True
 
@@ -312,6 +313,15 @@ class GameScene:
         
         if self.is_paused:
             self.pause_menu.draw(self.can_save)
+
+         # --- AÑADE ESTE CÓDIGO TEMPORALMENTE PARA VER LAS PLATAFORMAS ---
+        for p in self.platforms:
+            debug_rect = p.copy()
+            debug_rect.x = (p.x - render_offset_x) * self.zoom
+            debug_rect.y = (p.y - render_offset_y) * self.zoom
+            debug_rect.width *= self.zoom
+            debug_rect.height *= self.zoom
+            pygame.draw.rect(self.screen, (0, 0, 255), debug_rect, 2) # Dibuja en azul
 
     def run(self, selected_character_for_this_scene=None):
         if selected_character_for_this_scene:

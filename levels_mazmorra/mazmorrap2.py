@@ -17,10 +17,10 @@ class MazmorraP2Scene(GameScene):
         
         # --- LISTA SIMPLIFICADA ---
         dungeon_enemies = [
-            (500, ground_y, 250, "golem"),
-            (1000, ground_y, 300, "lobo"),
+            (500, ground_y-35, 250, "golem"),
+            (1000, ground_y, 300-15, "lobo"),
             (1500, ground_y, 200, "esqueleto"),
-            (2000, ground_y, 250, "golem"),
+            (2000, ground_y-40, 250, "golem"),
             (2500, ground_y, 150, "esqueleto"),
         ]
         
