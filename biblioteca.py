@@ -1,3 +1,5 @@
+# biblioteca.py (Este archivo es tu archivo de constantes principal)
+
 import pygame
 
 pygame.init()
@@ -28,7 +30,7 @@ JUMP_STRENGTH = -9
 PLAYER_WIDTH = 100
 PLAYER_HEIGHT = 100
 ENEMY_WIDTH = 100
-ENEMY_HEIGHT = 75  # Tamaño por defecto
+ENEMY_HEIGHT = 75  # Default size
 BOSS_WIDTH = 500
 BOSS_HEIGHT = 500
 BOSS_HEALTH = 2000
@@ -37,87 +39,113 @@ BOSS_HEALTH = 2000
 ELEMENTAL_COOLDOWN = 500
 SPECIAL_COOLDOWN = 2000
 
-# --- Asset Paths --- #
-MENU_BACKGROUND_PATH = "interfaz/fondo.png"
+# --- Asset Paths ---
+# Rutas de personajes (carpeta "Characters")
 PLAYER_SPRITE_PATHS = {
     "Prota": "Characters/prota.png",
     "Lia": "Characters/lia.png",
     "Kael": "Characters/kael.png",
     "Aria": "Characters/aria.png"
 }
-# PLAYER_ANIMATION_DATA ELIMINADO - Los personajes no usarán animaciones.
 
+# Rutas de iconos de habilidades (carpeta "poderes")
 SKILL_ICON_PATHS = {
-    "rock": "Skills/rock.png",
-    "sarten": "Skills/sarten.png",
-    "fire": "Skills/fire_projectile.png",
-    "ice": "Skills/ice_projectile.png",
-    "mixed": "Skills/mixed_projectile.png",
-    "root": "Skills/root.png",
-    "earth_spike": "Skills/earth_spike.png",
-    "lightning_bolt": "Skills/lightning_bolt.png",
-    "storm": "Skills/storm.png",
-    "boss_fireball": "Skills/boss_fireball.png",
-    "boss_groundwave": "Skills/boss_groundwave.png",
-    "lightning_strike": "Skills/lightning_strike.png",
-    "skeleton_sword": "Skills/skeleton_sword.png",
-    "hongo_proyectil": "Skills/hongo_proyectil.png"
+    "rock": "poderes/rock.png",
+    "sarten": "poderes/sarten.png",
+    "fire": "poderes/fire_projectile.png",
+    "ice": "poderes/ice_projectile.png",
+    "mixed": "poderes/mixed_projectile.png",
+    "root": "poderes/root.png",
+    "earth_spike": "poderes/earth_spike.png",
+    "lightning_bolt": "poderes/lightning_bolt.png",
+    "storm": "poderes/storm.png",
+    "boss_fireball": "poderes/boss_fireball.png",
+    "boss_groundwave": "poderes/boss_groundwave.png",
+    "lightning_strike": "poderes/lightning_strike.png",
+    "skeleton_sword": "poderes/skeleton_sword.png",
+    "hongo_proyectil": "poderes/hongo_proyectil.png"
 }
 
-## --- DICCIONARIO CENTRAL DE ENEMIGOS (en constants.py) ---
+## --- DICCIONARIO CENTRAL DE ENEMIGOS (sprites en la carpeta "entidades") ---
 ENEMY_INFO = {
     "esqueleto": {
-        "health": 60, "speed": 1.5, "contact_damage": 10, "scale": 2.0, "width": 60, "height": 90, "y_offset": 0, "hitbox_scale": (0.5, 0.9), "hitbox_offset": (0, 0),
-        "sprite_path": "Enemies/esqueleto.png", # Asumiendo un sprite estático para el esqueleto
+        "health": 60, "speed": 1.5, "contact_damage": 0.2,
+        "scale": 0.25, # ¡MUCHO MÁS PEQUEÑO! Si el lobo era 0.3, este debería ser similar o menos.
+        "width": 120, "height": 180, # Asumiendo dimensiones REALES de tu archivo esqueleto.png (ej. 120x180 pixels)
+        "y_offset": 0, # Ajuste fino si es necesario
+        "hitbox_scale": (0.6, 0.9), "hitbox_offset": (0, 0),
+        "sprite_path": "entidades/esqueleto.png",
         "death_sound": "sounds/muerte_esqueleto.wav",
-        "detection_radius": 300, # Ajustado
-        "attack_range": 70, # Para ataques de contacto simulados o cortos
+        "detection_radius": 300,
+        "attack_range": 70,
         "attack_cooldown": 1000,
         "attack_damage": 15
     },
     "goblins": {
-        "health": 35, "speed": 2.2, "contact_damage": 5, "scale": 0.5, "width": 50, "height": 40, "y_offset": 0, "hitbox_scale": (0.8, 0.8), "hitbox_offset": (0, 0),
-        "sprite_path": "Enemies/goblins.png", # Asegúrate de que esta ruta sea correcta
-        "death_sound": "sounds/goblin_death.mp3", # Ajustar si tienes otro sonido
+        "health": 35, "speed": 2.2, "contact_damage": 0.2,
+        "scale": 0.2, # Un poco más pequeño que el esqueleto, como en la imagen
+        "width": 100, "height": 80, # Asumiendo dimensiones REALES de tu goblins.png
+        "y_offset": 0,
+        "hitbox_scale": (0.8, 0.9), "hitbox_offset": (0, 0),
+        "sprite_path": "entidades/goblins.png",
+        "death_sound": "sounds/goblin_death.mp3",
         "detection_radius": 250
     },
     "gole": {
-        "health": 120, "speed": 0.8, "contact_damage": 20, "scale": 1.2, "width": 90, "height": 80, "y_offset": 0, "hitbox_scale": (0.9, 0.9), "hitbox_offset": (0, 0),
-        "sprite_path": "Enemies/gole.png", # Asegúrate de que esta ruta sea correcta
-        "death_sound": "sounds/gole_death.mp3", # Ajustar si tienes otro sonido
+        "health": 120, "speed": 0.8, "contact_damage": 0.2,
+        "scale": 0.35, # Puede ser un poco más grande que el esqueleto/goblin
+        "width": 200, "height": 200, # Asumiendo dimensiones REALES de tu gole.png
+        "y_offset": 0,
+        "hitbox_scale": (0.9, 0.9), "hitbox_offset": (0, 0),
+        "sprite_path": "entidades/gole.png",
+        "death_sound": "sounds/gole_death.mp3",
         "detection_radius": 350
     },
+    # PARA LOS JEFES, TAMBIÉN NECESITAMOS REDUCIR LA ESCALA SIGNIFICATIVAMENTE
     "jefe1": {
-        "health": BOSS_HEALTH, "speed": 0, "death_sound": "sounds/muerte_jefe1.wav", "scale": 1.0, "width": 250, "height": 250, "y_offset": 0, "hitbox_scale": (0.7, 0.9), "hitbox_offset": (0,0),
-        "sprite_path": "Enemies/jefe1.png", # Asumiendo un sprite estático para el jefe
+        "health": BOSS_HEALTH, "speed": 0, "death_sound": "sounds/muerte_jefe1.wav",
+        "scale": 0.2, # Reducido a la quinta parte del tamaño original si es muy grande
+        "width": 800, "height": 800, # Dimensiones REALES de tu jefe1.png (ej. 800x800 pixels)
+        "y_offset": 0,
+        "hitbox_scale": (0.7, 0.9), "hitbox_offset": (0,0),
+        "sprite_path": "entidades/jefe1.png",
         "is_boss": True
     },
     "jefe2": {
-        "health": BOSS_HEALTH * 1.5, "speed": 0, "death_sound": "sounds/muerte_jefe2.wav", "scale": 1.2, "width": 300, "height": 300, "y_offset": 0, "hitbox_scale": (0.7, 0.9), "hitbox_offset": (0,0),
-        "sprite_path": "Enemies/jefe2.png", # Asumiendo un sprite estático para el jefe
+        "health": BOSS_HEALTH * 1.5, "speed": 0, "death_sound": "sounds/muerte_jefe2.wav",
+        "scale": 0.22, # Ligeramente más grande que jefe1, si aplica
+        "width": 800, "height": 800, # Dimensiones REALES de tu jefe2.png
+        "y_offset": 0,
+        "hitbox_scale": (0.7, 0.9), "hitbox_offset": (0,0),
+        "sprite_path": "entidades/jefe2.png",
         "is_boss": True
     },
     "jefe3": {
-        "health": BOSS_HEALTH * 2, "speed": 0, "death_sound": "sounds/muerte_jefe3.wav", "scale": 1.5, "width": 350, "height": 350, "y_offset": 0, "hitbox_scale": (0.7, 0.9), "hitbox_offset": (0,0),
-        "sprite_path": "Enemies/jefe3.png", # Asumiendo un sprite estático para el jefe
+        "health": BOSS_HEALTH * 2, "speed": 0, "death_sound": "sounds/muerte_jefe3.wav",
+        "scale": 0.25, # El jefe final puede ser un poco más grande
+        "width": 800, "height": 800, # Dimensiones REALES de tu jefe3.png
+        "y_offset": 0,
+        "hitbox_scale": (0.7, 0.9), "hitbox_offset": (0,0),
+        "sprite_path": "entidades/jefe3.png",
         "is_boss": True
     }
 }
 
 
-# --- Map and Sound Paths ---
-# Actualizando los paths de mapas a la nueva estructura.
-MAP_ALDEA_PATH = "fondos/aldea_scene.png"
-MAP_MAZMORRA_PATH = "fondos/mazmorra_scene.png"
-MAP_MAZMORRA_P1_PATH = "fondos/mazmorrap1.png"
-MAP_MAZMORRA_JEFE1_PATH = "fondos/mazmorrajefe1.png"
-MAP_MAZMORRA_P2_PATH = "fondos/mazmorrap2.png"
-MAP_MAZMORRA_JEFE2_PATH = "fondos/mazmorrajefe2.png"
-MAP_MAZMORRA_P3_PATH = "fondos/mazmorrap3.png"
-MAP_MAZMORRA_JEFE3_PATH = "fondos/mazmorrajefe3.png"
+# --- Map and Sound Paths (fondos en la carpeta "backgrounds") ---
+MENU_BACKGROUND_PATH = "interfaz/fondo.png" # Asumiendo que esta es la ruta correcta para el fondo del menú
+
+MAP_ALDEA_PATH = "backgrounds/aldea_scene.png"
+MAP_MAZMORRA_PATH = "backgrounds/mazmorra.png"
+MAP_MAZMORRA_P1_PATH = "backgrounds/p1_mazmorra.png"
+MAP_MAZMORRA_JEFE1_PATH = "backgrounds/jefe1.png"
+MAP_MAZMORRA_P2_PATH = "backgrounds/p2_mazmorra.png"
+MAP_MAZMORRA_JEFE2_PATH = "backgrounds/jefe2.png"
+MAP_MAZMORRA_P3_PATH = "backgrounds/p3_mazmorra.png"
+MAP_MAZMORRA_JEFE3_PATH = "backgrounds/jefe3.png"
 
 MENU_MUSIC_PATH = "Soundtracks/menu.mp3"
-BOSS_MUSIC_PATH = "Soundtracks/soundtrackboss1.mp3" # Considera si habrá una música diferente por cada jefe.
+BOSS_MUSIC_PATH = "Soundtracks/soundtrackboss.mp3"
 
 INITIAL_ZOOM = 0.85
 DEATH_QUOTES = [

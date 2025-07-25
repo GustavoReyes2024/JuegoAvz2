@@ -1,9 +1,9 @@
 {
-    "last_scene": "mazmorra_p1",
+    "last_scene": "escenario_mazmorra",
     "progreso_llave": [
         false,
         false,
         false
     ],
-    "personaje": "Lia"
+    "personaje": "kael"
 }

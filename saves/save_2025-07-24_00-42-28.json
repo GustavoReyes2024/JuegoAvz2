@@ -1,0 +1,14 @@
+{
+    "last_scene": "mazmorrap2",
+    "progreso_llave": [
+        false,
+        false,
+        false
+    ],
+    "personaje": "Lia",
+    "player_pos_x": 705,
+    "player_pos_y": 655,
+    "player_health": 100,
+    "player_checkpoint_x": 800,
+    "player_checkpoint_y": 680
+}

@@ -174,35 +174,39 @@ class Enemigo:
 # --- CLASES DE JEFES ---
 # Los jefes también serán estáticos, pero mantendrán su lógica de ataque compleja.
 
+# entidad.py (fragmento de JefeBase y Jefe1)
+
 class JefeBase(Enemigo):
     def __init__(self, x, y, enemy_name):
         super().__init__(x, y, enemy_name)
-        self.is_boss = True # Asegura que la barra de salud no se dibuje por la lógica de Enemigo
+        self.is_boss = True
 
     def actualizar(self, jugador):
+        super().actualizar(jugador) # Esto actualiza los proyectiles del jefe también
+
+        if self.salud <= 0 and not self.is_dying:
+             self.is_dying = True # Marca que el jefe está muriendo
+             return # No permitir que el jefe ataque si está muriendo
+
         # Lógica de facing del jefe
         if jugador.rect.centerx < self.rect.centerx:
             self.facing_right = False
         elif jugador.rect.centerx > self.rect.centerx:
             self.facing_right = True
         
-        # Los proyectiles del jefe se actualizan en el super().actualizar()
-        super().actualizar(jugador) 
-        
         # Lógica de ataque de jefe
         ahora = pygame.time.get_ticks()
-        if ahora - self.last_attack_time > self.attack_cooldown and not self.is_dying:
+        if ahora - self.last_attack_time > self.attack_cooldown and not self.is_dying: # Solo ataca si no está muriendo
             self.atacar(jugador)
             self.last_attack_time = ahora
 
     def atacar(self, jugador):
-        # Este método debe ser sobrescrito por cada clase de jefe específica
-        pass
+        pass # Debe ser sobrescrito por subclases
 
 class Jefe1(JefeBase):
     def __init__(self, x, y):
         super().__init__(x, y, "jefe1")
-        self.attack_cooldown = 1800
+        self.attack_cooldown = 1800 # Asegúrate de que este cooldown no sea demasiado alto
         self.ataques_disponibles = ["diagonal", "suelo", "multiple"]
 
     def atacar(self, jugador):
@@ -220,8 +224,9 @@ class Jefe1(JefeBase):
                 nuevo_proyectil = abilities.BossDiagonalProjectile(self.rect.centerx, self.rect.centery, jugador.rect.centerx + offset_x, jugador.rect.centery - 50)
                 self.proyectiles.append(nuevo_proyectil)
         
-        # No hay self.action = 'attack' ni self.frame_index = 0 al no haber animaciones
-
+        # Como no hay animaciones, no establecemos self.action = 'attack'
+        # El proyectil se crea directamente.
+        
 class Jefe2(JefeBase):
     def __init__(self, x, y):
         super().__init__(x, y, "jefe2")

@@ -1,13 +1,11 @@
 import pygame
 import sys
-from escenas import GameScene # Still needed as AldeaScene inherits from it
-from dialogos import DialogueBox # Still needed for dialogue system
-from interfaz import PauseMenu # Likely used by GameScene for pause functionality
-# No longer explicitly importing interactables if aldea_interactables is empty
-# No longer importing biblioteca directly as its contents should be in constants or player/ability files
+from escenas import GameScene
+from dialogos import DialogueBox
+from interfaz import PauseMenu
 
-# Import necessary constants
-from biblioteca import (
+# Importar constantes generales desde biblioteca.py
+from biblioteca import ( # <-- Importar de biblioteca
     SCREEN_WIDTH, SCREEN_HEIGHT, FONT_LARGE, FONT_MEDIUM, FONT_SMALL,
     WHITE, DARK_GREY, MAGIC_BLUE, PLAYER_HEIGHT, PLAYER_SPRITE_PATHS,
     MAP_ALDEA_PATH
@@ -93,18 +91,11 @@ class AldeaScene(GameScene):
         self.map_height = 830
         ground_y_aldea = 640
         
-        # Platforms: essential for player movement (these are the 'hitboxes' for the ground)
         aldea_platforms = [pygame.Rect(0, ground_y_aldea, self.map_width, 50)]
-        
-        # Checkpoints: assuming none in the starting village
-        aldea_checkpoints = [] 
-        
-        # Interactables: keeping empty as per the previous removal of the import if unused specific interactables
-        aldea_interactables = [] 
+        aldea_checkpoints = []
+        aldea_interactables = []
         
         player_start = (100, ground_y_aldea - PLAYER_HEIGHT + 50)
-        
-        # Enemies: no enemies in the village
         aldea_enemies = []
         
         super().__init__(
@@ -112,12 +103,11 @@ class AldeaScene(GameScene):
             aldea_checkpoints,
             aldea_interactables,
             player_start, aldea_enemies,
-            self.map_width, self.map_height, next_scene_name="escenario_mazmorra"  # Next scene after village
+            self.map_width, self.map_height, next_scene_name="mazmorra_scene" # <-- ¡CORREGIDO AQUÍ!
         )
         
         self.name = "aldea_scene" # Scene name according to the new map structure
         
-        # Mission and character selection dialogues (kept as requested)
         self.dialogue_mission = DialogueBox(screen, text_lines=[
             "¡Saludos, viajero! Has llegado a la Aldea de Eldoria.",
             "Necesitamos tu ayuda. Una fuerza oscura ha corrompido la Mazmorra y pone en peligro a nuestra gente.",
@@ -129,7 +119,7 @@ class AldeaScene(GameScene):
             "Lia, la maga, domina el fuego y el hielo.",
             "Kael, el druida, controla la tierra y las raíces.",
             "Aria, la hechicera, invoca el poder del rayo y la tormenta."
-        ], speaker_name="Anciano Sabio") # Note: "Prota" was removed from here as per original text. If "Prota" should be an option, it needs to be explicitly added to character_select.run() in update().
+        ], speaker_name="Anciano Sabio")
 
         self.dialogue_after_selection = DialogueBox(screen, text_lines=[
             "¡Excelente elección! Que los ancestros te guíen a ti y a tu nuevo compañero.",
@@ -137,11 +127,10 @@ class AldeaScene(GameScene):
             "¡Buena suerte, guardián!"
         ], speaker_name="Anciano Sabio")
 
-        self.elder_trigger_x = 1200 # X position where elder dialogue is triggered
-        self.trigger_radius = 100 # Radius around elder to activate dialogue
+        self.elder_trigger_x = 1200
+        self.trigger_radius = 100
         
-        # Dialogue phases for controlling the sequence of dialogues and character selection
-        self.dialogue_phase = 0 # 0: Before dialogue, 1: Mission dialogue, 2: Pre-selection dialogue, 3: Character selection, 4: Post-selection dialogue, 5: Normal gameplay
+        self.dialogue_phase = 0
         self.mission_dialogue_done = False
         self.pre_selection_dialogue_done = False
         self.selection_processed = False
@@ -153,10 +142,9 @@ class AldeaScene(GameScene):
             self.respawn_player()
             return
 
-        # Dialogue phase logic (kept as requested)
         if self.dialogue_phase == 1:
             self.dialogue_mission.update()
-            self.jugador.vel_x = 0; self.jugador.vel_y = 0 # Stop player during dialogue
+            self.jugador.vel_x = 0; self.jugador.vel_y = 0
             if self.dialogue_mission.finished:
                 self.mission_dialogue_done = True
                 self.dialogue_phase = 2
@@ -166,31 +154,27 @@ class AldeaScene(GameScene):
             self.jugador.vel_x = 0; self.jugador.vel_y = 0
             if self.dialogue_pre_selection.finished:
                 self.pre_selection_dialogue_done = True
-                self.dialogue_phase = 3 # Transition to character selection phase
+                self.dialogue_phase = 3
         elif self.dialogue_phase == 3:
             if not self.selection_processed:
-                # Options for character selection (kept as original, only Lia, Kael, Aria)
-                # If "Prota" should also be selectable here, you would add it:
-                # character_select = CharacterSelectSceneInGame(self.screen, ["Prota", "Lia", "Kael", "Aria"])
                 character_select = CharacterSelectSceneInGame(self.screen, ["Lia", "Kael", "Aria"])
                 chosen_char = character_select.run()
                 if chosen_char:
                     global_selected_character_g = chosen_char
-                    self.jugador.cambiar_personaje(global_selected_character_g) # Update player object
+                    self.jugador.cambiar_personaje(global_selected_character_g)
                 self.selection_processed = True
                 self.dialogue_phase = 4
                 self.dialogue_after_selection.start()
             else:
-                self.dialogue_phase = 4 # Skip to next dialogue if selection already processed
+                self.dialogue_phase = 4
         elif self.dialogue_phase == 4:
             self.dialogue_after_selection.update()
             self.jugador.vel_x = 0; self.jugador.vel_y = 0
             if self.dialogue_after_selection.finished:
-                self.dialogue_phase = 5 # Dialogues complete, normal gameplay
-        else: # dialogue_phase == 0 or dialogue_phase == 5
-            super().update() # Execute normal GameScene update logic
+                self.dialogue_phase = 5
+        else:
+            super().update()
             
-            # Activate dialogue if player approaches the elder and dialogue hasn't started
             if self.dialogue_phase == 0:
                 distance_to_elder = abs(self.jugador.rect.centerx - self.elder_trigger_x)
                 if distance_to_elder <= self.trigger_radius:
@@ -202,23 +186,20 @@ class AldeaScene(GameScene):
             super().handle_input(evento)
             return
             
-        # Handle input for active dialogues (kept as requested)
         if self.dialogue_phase == 1:
             self.dialogue_mission.handle_input(evento)
         elif self.dialogue_phase == 2:
             self.dialogue_pre_selection.handle_input(evento)
         elif self.dialogue_phase == 3:
-            # Character selection input is handled within CharacterSelectSceneInGame.run()
-            pass 
+            pass
         elif self.dialogue_phase == 4:
             self.dialogue_after_selection.handle_input(evento)
-        else: # If no active dialogues, handle normal game input
+        else:
             super().handle_input(evento)
 
     def draw(self):
-        super().draw() # Draw background, platforms, player, etc.
+        super().draw()
         
-        # Draw dialogues based on current phase (kept as requested)
         if self.dialogue_phase == 1:
             self.dialogue_mission.draw()
         elif self.dialogue_phase == 2:
@@ -227,9 +208,5 @@ class AldeaScene(GameScene):
             self.dialogue_after_selection.draw()
 
     def run(self, selected_character_for_this_scene=None):
-        # Pass the global_selected_character_g to the GameScene's run method
-        # This ensures the player object is initialized with the correct character.
         super().run(global_selected_character_g)
-
-        # Return the next scene name and the (potentially updated) global selected character
         return self.next_scene_name, global_selected_character_g
