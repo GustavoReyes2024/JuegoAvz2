@@ -36,10 +36,10 @@ class P1MazmorraScene(GameScene): # Nombre de la clase corregido para coincidir 
         # --- LISTA DE ENEMIGOS PARA MAZMORRA P1 ---
         # ¡CORREGIDO: Eliminado el 3er parámetro (patrol_width)!
         dungeon_enemies = [
-            (600, ground_y - 90, "esqueleto"),
-            (1200, ground_y - 60, "goblins"),
-            (1800, ground_y - 100, "gole"),
-            (2400, ground_y - 60, "goblins"),
+            (600, ground_y - 10, "esqueleto"),
+            (1200, ground_y - 10, "goblins"),
+            (1800, ground_y, "gole"),
+            (2400, ground_y - 10, "goblins"),
         ]
         
         super().__init__(

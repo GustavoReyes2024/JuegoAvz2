@@ -38,12 +38,12 @@ class P2MazmorraScene(GameScene): # Nombre de la clase corregido para coincidir 
         # --- LISTA DE ENEMIGOS PARA MAZMORRA P2 ---
         # ¡CORREGIDO: Eliminado el 3er parámetro (patrol_width)!
         dungeon_enemies = [
-            (500, ground_y - 100, "gole"),
-            (1000, ground_y - 60, "goblins"),
-            (1500, ground_y - 100, "esqueleto"),
-            (2000, ground_y - 100, "gole"),
-            (2500, ground_y - 60, "goblins"),
-            (2800, ground_y - 100, "esqueleto"),
+            (500, ground_y, "gole"),
+            (1000, ground_y - 10, "goblins"),
+            (1500, ground_y - 10, "esqueleto"),
+            (2000, ground_y - 10, "gole"),
+            (2500, ground_y - 10, "goblins"),
+            (2800, ground_y - 10, "esqueleto"),
         ]
         
         super().__init__(

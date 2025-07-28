@@ -14,7 +14,7 @@ class P3MazmorraScene(GameScene): # Nombre de la clase corregido para coincidir 
         self.map_width = 3000
         self.map_height = 830
         
-        ground_y = 780 # Altura del suelo principal
+        ground_y = 820 # Altura del suelo principal
         
         # Plataformas: Puedes añadir más plataformas aquí si tu diseño de nivel lo requiere.
         dungeon_platforms = [
@@ -38,13 +38,13 @@ class P3MazmorraScene(GameScene): # Nombre de la clase corregido para coincidir 
         # --- LISTA DE ENEMIGOS PARA MAZMORRA P3 ---
         # ¡CORREGIDO: Eliminado el 3er parámetro (patrol_width)!
         dungeon_enemies = [
-            (400, ground_y - 90, "esqueleto"),
-            (800, ground_y - 100, "gole"),
-            (1200, ground_y - 60, "goblins"),
-            (1600, ground_y - 90, "esqueleto"),
-            (2000, ground_y - 100, "gole"),
-            (2400, ground_y - 60, "goblins"),
-            (2700, ground_y - 90, "esqueleto"),
+            (400, ground_y, "esqueleto"),
+            (800, ground_y, "gole"),
+            (1200, ground_y, "goblins"),
+            (1600, ground_y, "esqueleto"),
+            (2000, ground_y, "gole"),
+            (2400, ground_y, "goblins"),
+            (2700, ground_y, "esqueleto"),
         ]
         
         super().__init__(

@@ -2,9 +2,10 @@ import pygame
 import sys
 import random
 import math
-from biblioteca import *
 import abilities
-from biblioteca import ENEMY_INFO, ENEMY_WIDTH, ENEMY_HEIGHT, DETECTION_RADIUS, BLACK, RED_HEALTH
+from biblioteca import ( # Importa todas las constantes necesarias de biblioteca
+    ENEMY_INFO, ENEMY_WIDTH, ENEMY_HEIGHT, DETECTION_RADIUS, BLACK, RED_HEALTH
+)
 
 class Enemigo:
     def __init__(self, x, y, enemy_name):
@@ -17,16 +18,15 @@ class Enemigo:
         self.width = self.enemy_info.get("width", ENEMY_WIDTH)
         self.height = self.enemy_info.get("height", ENEMY_HEIGHT)
         self.scale = self.enemy_info.get("scale", 1.0)
-        
-        self.rect = pygame.Rect(0, 0, self.width * self.scale, self.height * self.scale)
+
+        self.rect = pygame.Rect(0, 0, int(self.width * self.scale), int(self.height * self.scale))
         self.rect.midbottom = (x, y)
-        
-        y_offset = self.enemy_info.get("y_offset", 0)
-        self.rect.y += y_offset
-        
-        # El hitbox se inicializa aquí, pero se actualizará cada frame para ser exacto.
-        self.hitbox = self.rect.copy()
-        
+
+        y_offset_visual = self.enemy_info.get("y_offset", 0)
+        self.rect.y += y_offset_visual
+
+        self.hitbox = pygame.Rect(0, 0, 1, 1) # Inicializar con un tamaño mínimo
+
         self.image = self._load_static_sprite(self.enemy_info.get("sprite_path"))
         self.proyectiles = []
         self.salud = self.enemy_info.get("health", 100)
@@ -41,7 +41,7 @@ class Enemigo:
         self.is_dying = False
         self.is_dead = False
         self.last_attack_time = pygame.time.get_ticks()
-        
+
         if not pygame.mixer.get_init():
             pygame.mixer.init()
         self.death_sound = self._load_sound(self.enemy_info.get("death_sound"))
@@ -53,7 +53,7 @@ class Enemigo:
         if path:
             try:
                 img = pygame.image.load(path).convert_alpha()
-                return pygame.transform.scale(img, (int(img.get_width() * self.scale), int(img.get_height() * self.scale)))
+                return pygame.transform.scale(img, (int(self.width * self.scale), int(self.height * self.scale)))
             except pygame.error:
                 print(f"⚠️ No se pudo cargar el sprite estático: {path}. Usando cuadrado negro.")
         surf = pygame.Surface((int(self.width * self.scale), int(self.height * self.scale)), pygame.SRCALPHA)
@@ -68,14 +68,28 @@ class Enemigo:
             print(f"⚠️ No se pudo cargar el sonido '{path}': {e}")
             return None
 
-    def actualizar(self, jugador):
-        # --- SOLUCIÓN DEFINITIVA PARA EL HITBOX ---
-        # Forzamos a que el hitbox sea una copia exacta del rectángulo principal en cada frame.
-        # Esto garantiza que el área de daño siempre coincida con el cuerpo del enemigo.
-        self.hitbox = self.rect.copy()
+    def actualizar(self, jugador, camera_offset_x):
+        # Actualizar la posición de la hitbox en cada frame
+        hitbox_scale_factor = self.enemy_info.get("hitbox_scale", (1.0, 1.0))
+        hitbox_offset_values = self.enemy_info.get("hitbox_offset", (0, 0))
 
+        actual_hitbox_width = self.rect.width * hitbox_scale_factor[0]
+        actual_hitbox_height = self.rect.height * hitbox_scale_factor[1]
+
+        self.hitbox.width = int(actual_hitbox_width)
+        self.hitbox.height = int(actual_hitbox_height)
+
+        self.hitbox.centerx = self.rect.centerx + hitbox_offset_values[0]
+        self.hitbox.centery = self.rect.centery + hitbox_offset_values[1]
+
+        # Actualiza proyectiles y comprueba colisión con el jugador
         for p in self.proyectiles[:]:
-            p.actualizar()
+            p.actualizar(camera_offset_x)
+
+            if p.activo and p.rect.colliderect(jugador.hitbox):
+                jugador.tomar_danio(p.danio)
+                p.activo = False
+
             if not p.activo:
                 self.proyectiles.remove(p)
 
@@ -86,10 +100,13 @@ class Enemigo:
         if self.salud > 0:
             dist_x = jugador.hitbox.centerx - self.hitbox.centerx
             distancia_al_jugador = abs(dist_x)
-            
+
             if distancia_al_jugador < self.attack_range and pygame.time.get_ticks() > self.last_attack_time + self.attack_cooldown:
                 self.vel_x = 0
-                jugador.tomar_danio(self.attack_damage)
+                if hasattr(self, 'atacar'):
+                    self.atacar(jugador)
+                else:
+                    pass
                 self.last_attack_time = pygame.time.get_ticks()
             elif distancia_al_jugador < self.detection_radius:
                 if dist_x > 0:
@@ -98,12 +115,12 @@ class Enemigo:
                     self.vel_x = -self.speed
             else:
                 self.vel_x = 0
-            
+
             self.rect.x += self.vel_x
-            
+
             if self.vel_x > 0: self.facing_right = True
             elif self.vel_x < 0: self.facing_right = False
-        
+
     def tomar_danio(self, cantidad):
         if self.salud > 0 and not self.is_dying:
             self.salud -= abs(cantidad)
@@ -117,39 +134,56 @@ class Enemigo:
         imagen_a_dibujar = self.image
         if not self.facing_right:
             imagen_a_dibujar = pygame.transform.flip(self.image, True, False)
-        
+
+        render_width = self.rect.width * zoom
+        render_height = self.rect.height * zoom
+
         render_pos_x = (self.rect.x - offset_x) * zoom
         render_pos_y = (self.rect.y - offset_y) * zoom
-        
-        superficie.blit(imagen_a_dibujar, (render_pos_x, render_pos_y))
 
-        for proyectil in self.proyectiles:
-            proyectil.dibujar(superficie, offset_x, offset_y, zoom)
+        if render_width > 0 and render_height > 0:
+            superficie.blit(pygame.transform.scale(imagen_a_dibujar, (int(render_width), int(render_height))), (render_pos_x, render_pos_y))
+        else:
+            fallback_rect = pygame.Rect(render_pos_x, render_pos_y, int(self.width * zoom), int(self.height * zoom))
+            pygame.draw.rect(superficie, BLACK, fallback_rect)
+            print(f"ADVERTENCIA: Sprite de {self.name} con render_width={render_width}, render_height={render_height}. Usando fallback.")
 
         if not self.is_dying and not self.enemy_info.get("is_boss"):
-            render_width = self.rect.width * zoom
-            bar_width = render_width * 0.8
+            render_width_bar = self.rect.width * zoom
+            bar_width = render_width_bar * 0.8
             bar_height = 6 * zoom if zoom > 0.5 else 3
             health_percentage = self.salud / self.salud_maxima
             current_health_width = int(bar_width * health_percentage)
-            
+
             bar_pos_x = ((self.rect.centerx - offset_x) * zoom) - (bar_width / 2)
             bar_pos_y = ((self.rect.top - offset_y) * zoom) - bar_height - (5 * zoom)
-            
+
             pygame.draw.rect(superficie, (50,0,0), (bar_pos_x, bar_pos_y, bar_width, bar_height))
             if current_health_width > 0:
                 pygame.draw.rect(superficie, RED_HEALTH, (bar_pos_x, bar_pos_y, current_health_width, bar_height))
+
+        for proyectil in self.proyectiles:
+            if hasattr(proyectil, 'dibujar'):
+                proyectil.dibujar(superficie, offset_x, offset_y, zoom)
 
 class JefeBase(Enemigo):
     def __init__(self, x, y, enemy_name):
         super().__init__(x, y, enemy_name)
         self.is_boss = True
 
-    def actualizar(self, jugador):
-        super().actualizar(jugador)
+    def actualizar(self, jugador, camera_offset_x):
+        super().actualizar(jugador, camera_offset_x)
+
         if self.salud <= 0 and not self.is_dying:
              self.is_dying = True
              return
+        if self.is_dying:
+            for p in self.proyectiles[:]:
+                p.actualizar(camera_offset_x)
+                if not p.activo:
+                    self.proyectiles.remove(p)
+            return
+
         if jugador.rect.centerx < self.rect.centerx:
             self.facing_right = False
         elif jugador.rect.centerx > self.rect.centerx:
@@ -170,15 +204,23 @@ class Jefe1(JefeBase):
 
     def atacar(self, jugador):
         ataque_elegido = random.choice(self.ataques_disponibles)
+
         if ataque_elegido == "diagonal":
-            self.proyectiles.append(abilities.BossDiagonalProjectile(self.rect.centerx, self.rect.centery, jugador.rect.centerx, jugador.rect.centery))
+            nuevo_proyectil = abilities.BossDiagonalProjectile(self.rect.centerx, self.rect.centery, jugador.rect.centerx, jugador.rect.centery)
+            self.proyectiles.append(nuevo_proyectil)
+
         elif ataque_elegido == "suelo":
             direccion = 1 if jugador.rect.centerx > self.rect.centerx else -1
-            self.proyectiles.append(abilities.BossGroundProjectile(self.rect.centerx, self.rect.bottom - 20, direccion))
+            # --- ESTA ES LA LÍNEA CORREGIDA ---
+            # Se usa la altura del jugador (jugador.rect.bottom) para que el proyectil SIEMPRE vaya por el suelo donde está el jugador
+            nuevo_proyectil = abilities.BossGroundProjectile(self.rect.centerx, jugador.rect.bottom, direccion)
+            self.proyectiles.append(nuevo_proyectil)
+
         elif ataque_elegido == "multiple":
             for i in range(-2, 3):
                 offset_x = i * 40
-                self.proyectiles.append(abilities.BossDiagonalProjectile(self.rect.centerx, self.rect.centery, jugador.rect.centerx + offset_x, jugador.rect.centery - 50))
+                nuevo_proyectil = abilities.BossDiagonalProjectile(self.rect.centerx, self.rect.centery, jugador.rect.centerx + offset_x, jugador.rect.centery - 50)
+                self.proyectiles.append(nuevo_proyectil)
 
 class Jefe2(JefeBase):
     def __init__(self, x, y):

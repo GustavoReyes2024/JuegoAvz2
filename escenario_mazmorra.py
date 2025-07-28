@@ -17,17 +17,21 @@ class MazmorraScene(GameScene): # <-- Clase llamada MazmorraScene
         ground_y_mazmorra = 700
         
         mazmorra_platforms = [pygame.Rect(0, ground_y_mazmorra, self.map_width, 50)]
-        mazmorra_checkpoints = []
+        
+        # --- ¡ESTA ES LA LÍNEA QUE HE MODIFICADO! ---
+        # He añadido un Rectángulo que funciona como punto de guardado
+        mazmorra_checkpoints = [
+            pygame.Rect(300, 600, 50, 100) # x=300, y=600, ancho=50, alto=100
+        ]
+        # --- FIN DE LA MODIFICACIÓN ---
+
         mazmorra_interactables = []
         
         player_start = (50, ground_y_mazmorra - PLAYER_HEIGHT)
         self.initial_enemies_data = [
-            # ¡REVISA ESTAS LÍNEAS! CADA UNA DEBE TENER SOLO TRES VALORES.
-            # (x, y, "nombre_enemigo")
-            (400, ground_y_mazmorra - 60, "goblins"), 
-            (800, ground_y_mazmorra - 90, "esqueleto"),
-            (1300, ground_y_mazmorra - 60, "gole"),
-            # Si tienes más líneas aquí, asegúrate de que también tengan 3 valores.
+            (400, ground_y_mazmorra, "goblins"), 
+            (800, ground_y_mazmorra, "esqueleto"),
+            (1300, ground_y_mazmorra, "gole"),
         ]
         
         super().__init__(
@@ -35,11 +39,11 @@ class MazmorraScene(GameScene): # <-- Clase llamada MazmorraScene
             mazmorra_checkpoints,
             mazmorra_interactables,
             player_start, self.initial_enemies_data,
-            self.map_width, self.map_height, next_scene_name="mazmorrap1" # Transición a mazmorrap1
+            self.map_width, self.map_height, next_scene_name="mazmorrap1"
         )
         
         self.music_path = "Soundtracks/soundtrack1.mp3"
-        self.name = "mazmorra_scene" # <-- ¡CORREGIDO AQUÍ para coincidir con scene_map en main.py!
+        self.name = "mazmorra_scene"
         
         self.dialogue_entrance = DialogueBox(screen, text_lines=[
             "Has entrado al oscuro umbral de la Mazmorra de las Sombras...",

@@ -65,30 +65,33 @@ SKILL_ICON_PATHS = {
 ## --- DICCIONARIO CENTRAL DE ENEMIGOS ---
 ENEMY_INFO = {
     "esqueleto": {
-        "health": 60, "speed": 1.5, "contact_damage": 0.2,
-        "scale": 0.25, "width": 120, "height": 180, "y_offset": 0,
-        "hitbox_scale": (1.0, 1.0), "hitbox_offset": (0, 0),
-        "sprite_path": "entidades/esqueleto.png", "death_sound": "sounds/muerte_esqueleto.wav",
-        "detection_radius": 300, "attack_range": 70, "attack_cooldown": 1000, "attack_damage": 15
+    "health": 60, "speed": 1.5, "contact_damage": 0.2,
+    "scale": 0.8, "width": 120, "height": 180, "y_offset": 0,
+    "hitbox_scale": (0.6, 0.7), # <-- CORREGIDO: Más pequeña y proporcionada al sprite.
+    "hitbox_offset": (0, 10),  # <-- CORREGIDO: Desplazada un poco hacia abajo para cubrir el cuerpo.
+    "sprite_path": "entidades/esqueleto.png", "death_sound": "sounds/muerte_esqueleto.wav",
+    "detection_radius": 300, "attack_range": 70, "attack_cooldown": 1000, "attack_damage": 15
     },
     "goblins": {
         "health": 35, "speed": 2.2, "contact_damage": 0.2,
-        "scale": 0.2, "width": 100, "height": 80, "y_offset": 0,
-        "hitbox_scale": (1.0, 1.0), "hitbox_offset": (0, 0),
+        "scale": 0.8, "width": 100, "height": 80, "y_offset": 0,
+        "hitbox_scale": (1.3, 2.0), "hitbox_offset": (0, 20),
         "sprite_path": "entidades/goblins.png", "death_sound": "sounds/goblin_death.mp3",
         "detection_radius": 250
     },
     "gole": {
         "health": 120, "speed": 0.8, "contact_damage": 0.2,
-        "scale": 0.35, "width": 200, "height": 200, "y_offset": 0,
+        "scale": 1, "width": 200, "height": 200, "y_offset": 0,
         "hitbox_scale": (1.0, 1.0), "hitbox_offset": (0, 0),
         "sprite_path": "entidades/gole.png", "death_sound": "sounds/gole_death.mp3",
         "detection_radius": 350
     },
     "jefe1": {
         "health": 2000, "speed": 0, "death_sound": "sounds/muerte_jefe1.wav",
-        "scale": 0.5, "width": 800, "height": 800, "y_offset": 0,
-        "hitbox_scale": (1.0, 1.0), "hitbox_offset": (0,0),
+        "scale": 1.0, "width": 800, "height": 800, "y_offset": 0,
+        # ...
+        "hitbox_scale": (0.4, 0.7), "hitbox_offset": (0, 80),
+        # ...
         "sprite_path": "entidades/jefe1.png", "is_boss": True,
         "is_flying": True
     },

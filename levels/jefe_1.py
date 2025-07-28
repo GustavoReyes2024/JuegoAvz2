@@ -47,7 +47,7 @@ class Jefe1Scene(GameScene): # Nombre de la clase corregido para coincidir con m
         # Asegúrate de que la posición 'y' sea adecuada para la base del jefe.
         # Usa el nombre "jefe1" para que cargue la información de ENEMY_INFO
         boss_start_x = self.map_width - 400 # Posición del jefe (ej. a la derecha)
-        boss_start_y = ground_y # El jefe debería estar en el suelo
+        boss_start_y = ground_y+150  # El jefe debería estar en el suelo
         self.boss = Jefe1(boss_start_x, boss_start_y) # Instancia la clase Jefe1
         self.enemigos.append(self.boss) # Añade el jefe a la lista de enemigos de la escena
         

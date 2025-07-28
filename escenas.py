@@ -3,14 +3,13 @@ import sys
 import math
 import random
 
-# Importar constantes y clases necesarias desde biblioteca.py
-from biblioteca import ( # <-- Importar de biblioteca
+from biblioteca import (
     SCREEN_WIDTH, SCREEN_HEIGHT, INITIAL_ZOOM, BLACK, WHITE,
     RED_HEALTH, GREEN_HEALTH, ENEMY_INFO, DEATH_QUOTES,
-    FONT_SMALL, FONT_MEDIUM # Asegurarse que FONT_MEDIUM también esté aquí si se usa en _draw_hud
+    FONT_SMALL, FONT_MEDIUM
 )
 from jugador import Jugador
-from entidad import Enemigo, Jefe1, Jefe2, Jefe3 # Asegúrate de que las clases de Jefe estén aquí
+from entidad import Enemigo, Jefe1, Jefe2, Jefe3
 from visuales import HitSplat
 from interfaz import PauseMenu, DeathScreenQuote
 from guardar import save_game
@@ -25,7 +24,7 @@ class GameScene:
         self.checkpoints = checkpoints
         self.interactables = interactables
         self.player_start_pos = player_start_pos
-        self.enemies_data = enemies_data # Datos para spawnear enemigos
+        self.enemies_data = enemies_data
         self.next_scene_name = next_scene_name
         self.fondo_original = self._load_background()
         self.map_width = map_width
@@ -41,8 +40,8 @@ class GameScene:
         self.reloj = pygame.time.Clock()
         self.running = True
         
-        self.offset_x = 0 # Offset X de la cámara
-        self.offset_y = 0 # Offset Y de la cámara
+        self.offset_x = 0
+        self.offset_y = 0
         
         self.music_path = "Soundtracks/soundtrack1.mp3"
         self.cambio_escena_activo = False
@@ -51,20 +50,18 @@ class GameScene:
         self.shake_timer = 0
         self.shake_intensity = 0
         
-        self.name = "" # Nombre de la escena
+        self.name = ""
         
         if not pygame.mixer.get_init():
             pygame.mixer.init()
         self.pause_menu = PauseMenu(self.screen)
         self.can_save = False
         
-        # Carga de fragmentos de llave
         self.key_fragments_on = []
         self.key_fragments_off = []
         key_fragment_size = (40, 40)
         for i in range(1, 4):
             try:
-                # Las rutas aquí son relativas al directorio principal del juego.
                 on_image = pygame.image.load(f"interfaz/key_fragment_{i}_on.png").convert_alpha()
                 self.key_fragments_on.append(pygame.transform.scale(on_image, key_fragment_size))
                 off_image = pygame.image.load(f"interfaz/key_fragment_{i}_off.png").convert_alpha()
@@ -99,9 +96,7 @@ class GameScene:
             return None
 
     def _spawn_enemies(self):
-        """Instancia a los enemigos y jefes en la escena según los datos iniciales."""
         self.enemigos = []
-        # ¡CORREGIDO: SOLO SE ESPERAN 3 VALORES EN LA TUPLA!
         for x, y, enemy_name in self.enemies_data:
             enemy_info = ENEMY_INFO.get(enemy_name)
             if enemy_info:
@@ -261,26 +256,15 @@ class GameScene:
         self.jugador.actualizar(teclas, self.platforms, self.map_width, self.map_height)
         
         for enemigo in self.enemigos:
-            enemigo.actualizar(self.jugador)
+            enemigo.actualizar(self.jugador, self.offset_x)
             
         for checkpoint in self.checkpoints:
             if self.jugador.rect.colliderect(checkpoint) and not self.can_save:
                 self.jugador.last_checkpoint = checkpoint.topleft
                 self.can_save = True
-                game_data = {
-                    "last_scene": self.name,
-                    "progreso_llave": self.progreso_llave,
-                    "personaje": self.jugador.personaje,
-                    "player_pos_x": self.jugador.rect.x,
-                    "player_pos_y": self.jugador.rect.y,
-                    "player_health": self.jugador.salud,
-                    "player_checkpoint_x": self.jugador.last_checkpoint[0],
-                    "player_checkpoint_y": self.jugador.last_checkpoint[1],
-                }
-                save_game(game_data)
         
         for proyectil in self.jugador.proyectiles[:]:
-            proyectil.actualizar(self.offset_x) # <--- PASANDO offset_x
+            proyectil.actualizar(self.offset_x)
             if not proyectil.activo:
                 self.jugador.proyectiles.remove(proyectil)
                 continue
@@ -308,13 +292,6 @@ class GameScene:
             if enemigo.contact_damage > 0:
                 if enemigo.salud > 0 and self.jugador.hitbox.colliderect(enemigo.hitbox):
                     self.jugador.tomar_danio(enemigo.contact_damage)
-            
-            if hasattr(enemigo, 'proyectiles'):
-                for proyectil_enemigo in enemigo.proyectiles[:]:
-                    proyectil_enemigo.actualizar(self.offset_x) # <--- PASANDO offset_x
-                    if proyectil_enemigo.activo and proyectil_enemigo.rect.colliderect(self.jugador.hitbox):
-                        self.jugador.tomar_danio(proyectil_enemigo.danio)
-                        proyectil_enemigo.activo = False
 
         for effect in self.effects[:]:
             effect.update()
