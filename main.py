@@ -131,7 +131,7 @@ def quit_game():
     sys.exit()
 
 def main_menu():
-    """Muestra y gestiona el menú principal del juego."""
+    """Muestra y gestiona el me nú principal del juego."""
     try:
         fondo_menu = pygame.image.load(MENU_BACKGROUND_PATH).convert()
         fondo_menu = pygame.transform.scale(fondo_menu, (SCREEN_WIDTH, SCREEN_HEIGHT))

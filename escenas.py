@@ -3,7 +3,7 @@ import sys
 import math
 import random
 
-from biblioteca import (
+from biblioteca import ( # Importa todas las constantes necesarias desde biblioteca
     SCREEN_WIDTH, SCREEN_HEIGHT, INITIAL_ZOOM, BLACK, WHITE,
     RED_HEALTH, GREEN_HEALTH, ENEMY_INFO, DEATH_QUOTES,
     FONT_SMALL, FONT_MEDIUM
@@ -13,6 +13,7 @@ from entidad import Enemigo, Jefe1, Jefe2, Jefe3
 from visuales import HitSplat
 from interfaz import PauseMenu, DeathScreenQuote
 from guardar import save_game
+import abilities # Asegúrate de que abilities esté importado
 
 class GameScene:
     _current_music_path = None
@@ -262,6 +263,17 @@ class GameScene:
             if self.jugador.rect.colliderect(checkpoint) and not self.can_save:
                 self.jugador.last_checkpoint = checkpoint.topleft
                 self.can_save = True
+                game_data = {
+                    "last_scene": self.name,
+                    "progreso_llave": self.progreso_llave,
+                    "personaje": self.jugador.personaje,
+                    "player_pos_x": self.jugador.rect.x,
+                    "player_pos_y": self.jugador.rect.y,
+                    "player_health": self.jugador.salud,
+                    "player_checkpoint_x": self.jugador.last_checkpoint[0],
+                    "player_checkpoint_y": self.jugador.last_checkpoint[1],
+                }
+                save_game(game_data)
         
         for proyectil in self.jugador.proyectiles[:]:
             proyectil.actualizar(self.offset_x)
@@ -292,6 +304,32 @@ class GameScene:
             if enemigo.contact_damage > 0:
                 if enemigo.salud > 0 and self.jugador.hitbox.colliderect(enemigo.hitbox):
                     self.jugador.tomar_danio(enemigo.contact_damage)
+            
+            if hasattr(enemigo, 'proyectiles'):
+                proyectiles_a_eliminar_del_enemigo = []
+                proyectiles_a_añadir_al_enemigo = []
+
+                for proyectil_enemigo in enemigo.proyectiles[:]:
+                    # Lógica para generar la lluvia de rayos del Jefe 3 (ElectricRayDiagonal ya no la activa)
+                    # ESTE BLOQUE HA SIDO ELIMINADO/MODIFICADO EN LA ÚLTIMA VERSIÓN.
+                    # Ya no se detecta ElectricRayDiagonal aquí para spawnear FallingLightning.
+
+                    if proyectil_enemigo.activo and proyectil_enemigo.rect.colliderect(self.jugador.hitbox):
+                        if hasattr(proyectil_enemigo, 'hits_multiple') and proyectil_enemigo.hits_multiple:
+                            if hasattr(proyectil_enemigo, 'aplicar_dot_danio'):
+                                if proyectil_enemigo.aplicar_dot_danio(self.jugador):
+                                    self.jugador.tomar_danio(proyectil_enemigo.dot_damage)
+                                    proyectil_enemigo.last_damage_tick = pygame.time.get_ticks()
+                            else: # Como FallingLightning (hits_multiple, pero daño único por impacto)
+                                self.jugador.tomar_danio(proyectil_enemigo.danio)
+                        else:
+                            self.jugador.tomar_danio(proyectil_enemigo.danio)
+                            proyectil_enemigo.activo = False
+
+                for p_to_remove in proyectiles_a_eliminar_del_enemigo:
+                    if p_to_remove in enemigo.proyectiles:
+                        enemigo.proyectiles.remove(p_to_remove)
+                enemigo.proyectiles.extend(proyectiles_a_añadir_al_enemigo)
 
         for effect in self.effects[:]:
             effect.update()

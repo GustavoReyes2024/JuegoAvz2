@@ -1,5 +1,5 @@
 {
-    "last_scene": "mazmorrap3",
+    "last_scene": "mazmorrajefe2",
     "progreso_llave": [
         true,
         true,
@@ -7,8 +7,8 @@
     ],
     "personaje": "Kael",
     "player_pos_x": 150,
-    "player_pos_y": 800,
-    "player_health": 45,
+    "player_pos_y": 720,
+    "player_health": 95.39999999999993,
     "player_checkpoint_x": 150,
     "player_checkpoint_y": 800
 }

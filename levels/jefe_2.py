@@ -46,7 +46,7 @@ class Jefe2Scene(GameScene): # Nombre de la clase corregido para coincidir con m
 
         # --- Instanciar al Jefe2 ---
         boss_start_x = self.map_width - 400 # Posición de spawn del jefe
-        boss_start_y = ground_y # El jefe aparece en el suelo
+        boss_start_y = ground_y + 150# El jefe aparece en el suelo
         self.boss = Jefe2(boss_start_x, boss_start_y) # Instancia la clase Jefe2
         self.enemigos.append(self.boss) # Añade el jefe a la lista de enemigos de la escena
         

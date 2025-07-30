@@ -35,7 +35,7 @@ class Enemigo:
         self.detection_radius = self.enemy_info.get("detection_radius", DETECTION_RADIUS)
         self.attack_range = self.enemy_info.get("attack_range", 80)
         self.attack_damage = self.enemy_info.get("attack_damage", 10)
-        self.attack_cooldown = self.enemy_info.get("attack_cooldown", 2000)
+        self.attack_cooldown = 2000 # Valor por defecto
         self.contact_damage = self.enemy_info.get("contact_damage", 0)
         self.facing_right = True
         self.is_dying = False
@@ -69,7 +69,6 @@ class Enemigo:
             return None
 
     def actualizar(self, jugador, camera_offset_x):
-        # Actualizar la posición de la hitbox en cada frame
         hitbox_scale_factor = self.enemy_info.get("hitbox_scale", (1.0, 1.0))
         hitbox_offset_values = self.enemy_info.get("hitbox_offset", (0, 0))
 
@@ -82,14 +81,8 @@ class Enemigo:
         self.hitbox.centerx = self.rect.centerx + hitbox_offset_values[0]
         self.hitbox.centery = self.rect.centery + hitbox_offset_values[1]
 
-        # Actualiza proyectiles y comprueba colisión con el jugador
         for p in self.proyectiles[:]:
             p.actualizar(camera_offset_x)
-
-            if p.activo and p.rect.colliderect(jugador.hitbox):
-                jugador.tomar_danio(p.danio)
-                p.activo = False
-
             if not p.activo:
                 self.proyectiles.remove(p)
 
@@ -166,6 +159,15 @@ class Enemigo:
             if hasattr(proyectil, 'dibujar'):
                 proyectil.dibujar(superficie, offset_x, offset_y, zoom)
 
+        # if hasattr(self, 'hitbox'):
+        #     debug_rect = self.hitbox.copy()
+        #     debug_rect.x = (self.hitbox.x - offset_x) * zoom
+        #     debug_rect.y = (self.hitbox.y - offset_y) * zoom
+        #     debug_rect.width *= zoom
+        #     debug_rect.height *= zoom
+        #     pygame.draw.rect(superficie, (255, 0, 0), debug_rect, 2)
+
+
 class JefeBase(Enemigo):
     def __init__(self, x, y, enemy_name):
         super().__init__(x, y, enemy_name)
@@ -211,8 +213,6 @@ class Jefe1(JefeBase):
 
         elif ataque_elegido == "suelo":
             direccion = 1 if jugador.rect.centerx > self.rect.centerx else -1
-            # --- ESTA ES LA LÍNEA CORREGIDA ---
-            # Se usa la altura del jugador (jugador.rect.bottom) para que el proyectil SIEMPRE vaya por el suelo donde está el jugador
             nuevo_proyectil = abilities.BossGroundProjectile(self.rect.centerx, jugador.rect.bottom, direccion)
             self.proyectiles.append(nuevo_proyectil)
 
@@ -226,29 +226,49 @@ class Jefe2(JefeBase):
     def __init__(self, x, y):
         super().__init__(x, y, "jefe2")
         self.attack_cooldown = 2200
-        self.ataques_disponibles = ["homing_orb", "ground_eruption", "melee_attack"]
+        self.ataques_disponibles = ["homing_orb", "falling_attack", "melee_attack"]
 
     def atacar(self, jugador):
         ataque_elegido = random.choice(self.ataques_disponibles)
+
         if ataque_elegido == "homing_orb":
             self.proyectiles.append(abilities.NightBorneHomingOrb(self.hitbox.centerx, self.hitbox.centery, jugador))
-        elif ataque_elegido == "ground_eruption":
-            self.proyectiles.append(abilities.NightBorneEruption(jugador.hitbox.centerx, jugador.rect.bottom))
+
+        elif ataque_elegido == "falling_attack":
+            spawn_x = jugador.hitbox.centerx + random.randint(-50, 50)
+            spawn_y = jugador.hitbox.top - 300
+            nuevo_proyectil = abilities.BossFallingProjectile(spawn_x, spawn_y)
+            self.proyectiles.append(nuevo_proyectil)
+
         elif ataque_elegido == "melee_attack":
             if abs(jugador.hitbox.centerx - self.hitbox.centerx) < self.attack_range + 50:
                 jugador.tomar_danio(self.attack_damage)
+
 
 class Jefe3(JefeBase):
     def __init__(self, x, y):
         super().__init__(x, y, "jefe3")
         self.attack_cooldown = 2500
-        self.ataques_disponibles = ["mega_impacto", "lluvia_de_fuego"]
+        self.ataques_disponibles = ["mega_impacto", "lluvia_de_fuego", "diagonal_rayo", "ground_lightning_surge"] # <-- NUEVOS NOMBRES
 
     def atacar(self, jugador):
         ataque_elegido = random.choice(self.ataques_disponibles)
+        # print(f"DEBUG: Jefe3 atacando con {ataque_elegido}") # Debug
+
         if ataque_elegido == "mega_impacto":
-            self.proyectiles.append(abilities.MegaImpactoProjectile(self.hitbox.centerx, self.rect.bottom - 20, jugador.hitbox.centerx))
-        elif ataque_elegido == "lluvia_de_fuego":
-            for _ in range(5):
+            nuevo_proyectil = abilities.MegaImpactoProjectile(self.hitbox.centerx, self.rect.bottom - 20, jugador.hitbox.centerx)
+            self.proyectiles.append(nuevo_proyectil)
+
+        elif ataque_elegido == "lluvia_de_fuego": # Este ataque usa FallingFireProjectile
+            for _ in range(5): # Cantidad de "gotas" de fuego
                 spawn_x = random.randint(int(jugador.hitbox.centerx - 200), int(jugador.hitbox.centerx + 200))
-                self.proyectiles.append(abilities.FallingFireProjectile(spawn_x, jugador.hitbox.top - 300))
+                spawn_y = jugador.hitbox.top - 400 # Aparece muy por encima del jugador
+                self.proyectiles.append(abilities.FallingFireProjectile(spawn_x, spawn_y))
+
+        elif ataque_elegido == "diagonal_rayo": # Este ataque usa ElectricRayDiagonal
+            rayo_diagonal = abilities.ElectricRayDiagonal(self.hitbox.centerx, self.rect.centery, jugador.hitbox.centerx, jugador.hitbox.centery)
+            self.proyectiles.append(rayo_diagonal)
+
+        elif ataque_elegido == "ground_lightning_surge": # Este ataque usa BossGroundLightning
+            ground_lightning = abilities.BossGroundLightning(jugador.hitbox.centerx, jugador.rect.bottom)
+            self.proyectiles.append(ground_lightning)

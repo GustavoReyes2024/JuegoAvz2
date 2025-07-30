@@ -36,7 +36,7 @@ class P1MazmorraScene(GameScene): # Nombre de la clase corregido para coincidir 
         # --- LISTA DE ENEMIGOS PARA MAZMORRA P1 ---
         # ¡CORREGIDO: Eliminado el 3er parámetro (patrol_width)!
         dungeon_enemies = [
-            (600, ground_y - 10, "esqueleto"),
+            (600, ground_y - 5, "esqueleto"),
             (1200, ground_y - 10, "goblins"),
             (1800, ground_y, "gole"),
             (2400, ground_y - 10, "goblins"),
