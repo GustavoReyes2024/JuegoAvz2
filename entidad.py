@@ -249,20 +249,20 @@ class Jefe3(JefeBase):
     def __init__(self, x, y):
         super().__init__(x, y, "jefe3")
         self.attack_cooldown = 2500
-        self.ataques_disponibles = ["mega_impacto", "lluvia_de_fuego", "diagonal_rayo", "ground_lightning_surge"] # <-- NUEVOS NOMBRES
+        self.ataques_disponibles = ["lluvia_de_fuego", "diagonal_rayo", "ground_lightning_surge"] # <-- NUEVOS NOMBRES
 
     def atacar(self, jugador):
         ataque_elegido = random.choice(self.ataques_disponibles)
         # print(f"DEBUG: Jefe3 atacando con {ataque_elegido}") # Debug
 
-        if ataque_elegido == "mega_impacto":
-            nuevo_proyectil = abilities.MegaImpactoProjectile(self.hitbox.centerx, self.rect.bottom - 20, jugador.hitbox.centerx)
-            self.proyectiles.append(nuevo_proyectil)
+        # if ataque_elegido == "mega_impacto":
+        #     nuevo_proyectil = abilities.MegaImpactoProjectile(self.hitbox.centerx, self.rect.bottom - 20, jugador.hitbox.centerx)
+        #     self.proyectiles.append(nuevo_proyectil)
 
-        elif ataque_elegido == "lluvia_de_fuego": # Este ataque usa FallingFireProjectile
-            for _ in range(5): # Cantidad de "gotas" de fuego
+        if ataque_elegido == "lluvia_de_fuego": # Este ataque usa FallingFireProjectile
+            for _ in range(3): # Cantidad de "gotas" de fuego
                 spawn_x = random.randint(int(jugador.hitbox.centerx - 200), int(jugador.hitbox.centerx + 200))
-                spawn_y = jugador.hitbox.top - 400 # Aparece muy por encima del jugador
+                spawn_y = jugador.hitbox.top - 300 # Aparece muy por encima del jugador
                 self.proyectiles.append(abilities.FallingFireProjectile(spawn_x, spawn_y))
 
         elif ataque_elegido == "diagonal_rayo": # Este ataque usa ElectricRayDiagonal

@@ -3,7 +3,7 @@ import sys
 import os
 
 # Importar constantes generales desde biblioteca.py
-from biblioteca import ( # <-- CAMBIADO DE 'constants' a 'biblioteca'
+from biblioteca import (
     SCREEN_WIDTH, SCREEN_HEIGHT, FONT_LARGE, MAGIC_BLUE, WHITE, DARK_GREY,
     MENU_BACKGROUND_PATH, MENU_MUSIC_PATH
 )
@@ -12,18 +12,15 @@ from guardar import save_game, load_game, get_saved_games
 from interfaz import LoadGameScreen
 
 # Importar las clases de cada escena.
-# ¡NOMBRES DE ARCHIVO ORIGINALES MANTENIDOS!
-from aldea import AldeaScene, global_selected_character_g # ARCHIVO 'aldea.py'
-from escenario_mazmorra import MazmorraScene # ARCHIVO 'escenario_mazmorra.py'
-
-# Importar las escenas que están dentro de la carpeta 'levels'
-# ¡NOMBRES DE ARCHIVO ORIGINALES MANTENIDOS!
+from aldea import AldeaScene, global_selected_character_g
+from escenario_mazmorra import MazmorraScene
 from levels.p1_mazmorra import P1MazmorraScene
 from levels.jefe_1 import Jefe1Scene
 from levels.p2_mazmorra import P2MazmorraScene
 from levels.jefe_2 import Jefe2Scene
 from levels.p3_mazmorra import P3MazmorraScene
 from levels.jefe_3 import Jefe3Scene
+from creditos import CreditosScene
 
 
 pygame.init()
@@ -31,19 +28,16 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Elemental Trinity")
 
 # --- MAPA DE ESCENAS COMPLETO Y ACTUALIZADO ---
-# Las claves deben coincidir con los `next_scene_name` en tus clases de escena.
-# Los valores son las clases de las escenas.
-# ¡CLAVES DE ESCENA AHORA COINCIDEN CON LA NOMENCLATURA QUE HAS ESTADO USANDO!
-# Y los valores son las clases importadas de los ARCHIVOS ORIGINALES.
 scene_map = {
-    "aldea_scene": AldeaScene,        # La clase AldeaScene está en aldea.py
-    "mazmorra_scene": MazmorraScene,  # La clase MazmorraScene está en escenario_mazmorra.py
-    "mazmorrap1": P1MazmorraScene,    # La clase P1MazmorraScene está en levels/p1_mazmorra.py
-    "mazmorrajefe1": Jefe1Scene,      # La clase Jefe1Scene está en levels/jefe_1.py
-    "mazmorrap2": P2MazmorraScene,    # La clase P2MazmorraScene está en levels/p2_mazmorra.py
-    "mazmorrajefe2": Jefe2Scene,      # La clase Jefe2Scene está en levels/jefe_2.py
-    "mazmorrap3": P3MazmorraScene,    # La clase P3MazmorraScene está en levels/p3_mazmorra.py
-    "mazmorrajefe3": Jefe3Scene,      # La clase Jefe3Scene está en levels/jefe_3.py
+    "aldea_scene": AldeaScene,
+    "mazmorra_scene": MazmorraScene,
+    "mazmorrap1": P1MazmorraScene,
+    "mazmorrajefe1": Jefe1Scene,
+    "mazmorrap2": P2MazmorraScene,
+    "mazmorrajefe2": Jefe2Scene,
+    "mazmorrap3": P3MazmorraScene,
+    "mazmorrajefe3": Jefe3Scene,
+    "creditos_scene": CreditosScene,
 }
 
 # Variables globales que se pueden pasar entre escenas o cargar
@@ -70,8 +64,13 @@ def run_game_loop(start_scene_name, character, key_progress, loaded_game_data=No
             break
         
         current_scene = current_scene_class(screen)
-        current_scene.set_key_progress(progreso_llave)
-        current_scene.name = next_scene_name
+        
+        # --- CORRECCIÓN 1: Comprobar si los métodos existen antes de llamarlos ---
+        if hasattr(current_scene, 'set_key_progress'):
+            current_scene.set_key_progress(progreso_llave)
+        
+        if hasattr(current_scene, 'name'):
+            current_scene.name = next_scene_name
         
         if loaded_game_data and next_scene_name == start_scene_name:
             next_scene_name, returned_character = current_scene.run(
@@ -84,7 +83,10 @@ def run_game_loop(start_scene_name, character, key_progress, loaded_game_data=No
                 selected_character_for_this_scene=selected_character_for_next_scene
             )
         
-        progreso_llave = current_scene.progreso_llave
+        # --- CORRECCIÓN 2: Comprobar si el atributo existe antes de acceder a él ---
+        if hasattr(current_scene, 'progreso_llave'):
+            progreso_llave = current_scene.progreso_llave
+            
         if returned_character:
             selected_character_for_next_scene = returned_character
             global_selected_character_g = returned_character
@@ -131,7 +133,7 @@ def quit_game():
     sys.exit()
 
 def main_menu():
-    """Muestra y gestiona el me nú principal del juego."""
+    """Muestra y gestiona el menú principal del juego."""
     try:
         fondo_menu = pygame.image.load(MENU_BACKGROUND_PATH).convert()
         fondo_menu = pygame.transform.scale(fondo_menu, (SCREEN_WIDTH, SCREEN_HEIGHT))

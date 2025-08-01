@@ -258,7 +258,7 @@ class MegaImpactoProjectile(StaticProyectil):
         self.initial_y = start_y
         self.vel_y_current = -15
         self.gravity = 1.0
-        self.lifetime = 4000
+        self.lifetime = 4000  # Duración máxima de vida por si no impacta
         self.creation_time = pygame.time.get_ticks()
         self.state = "rising"
         if self.image:
@@ -289,7 +289,9 @@ class MegaImpactoProjectile(StaticProyectil):
                 self.vel_y_current = 0
                 time_remaining_ms = self.lifetime - elapsed_time
                 if time_remaining_ms > 0:
-                    self.vel_x = (self.target_x - self.rect.centerx) / (time_remaining_ms / (1000 / 60))
+                    # Frames restantes aproximados
+                    frames_remaining = time_remaining_ms / (1000 / 60)
+                    self.vel_x = (self.target_x - self.rect.centerx) / frames_remaining if frames_remaining > 0 else 0
                 else:
                     self.vel_x = 0
 
@@ -303,13 +305,19 @@ class MegaImpactoProjectile(StaticProyectil):
                 self.vel_x = 0
                 self.vel_y_current = 0
                 self.active_for_damage = True
-                self.lifetime = current_time + 1000
+                # CORRECCIÓN: Se ajusta el tiempo de vida total para que sea
+                # el tiempo que tardó en impactar más 1 segundo adicional.
+                self.lifetime = elapsed_time + 1000
             
             self.vel_y = self.vel_y_current
 
         elif self.state == "impacted":
+            # En este estado, el proyectil ya no se mueve.
+            # Solo espera a que se cumpla su nuevo tiempo de vida.
             pass
 
+        # Se vuelve a llamar al método padre para mantener otras lógicas de desactivación,
+        # como salir de la pantalla, aunque en este caso la principal es el tiempo.
         super().actualizar(camera_offset_x)
 
 
@@ -320,6 +328,7 @@ class FallingFireProjectile(StaticProyectil):
         super().__init__(x, y, 0, "fire", default_size=(60, 80), damage=5, speed=random.uniform(8, 12), elemental_type="fire")
         if self.image:
             self.rect = self.image.get_rect(center=(x, y))
+            self.rect.y +=30
         self.lifetime = 4000
         self.creation_time = pygame.time.get_ticks()
         self.vel_x = 0
@@ -344,7 +353,7 @@ class ElectricRayDiagonal(StaticProyectil):
     def __init__(self, start_x, start_y, target_x, target_y):
         # Aumentar daño para el rayo diagonal inicial.
         # Ajustar default_size para que sea más un "haz" o "bola" si el sprite original no rota bien.
-        super().__init__(start_x, start_y, 0, "lightning_bolt", default_size=(50, 20), damage=5, speed=20, elemental_type="rayo")
+        super().__init__(start_x, start_y, 0, "lightning_bolt", default_size=(80, 40), damage=5, speed=20, elemental_type="rayo")
         
         self.original_image = self._load_scaled_image(SKILL_ICON_PATHS.get("lightning_bolt"), self.default_size)
         if self.original_image:

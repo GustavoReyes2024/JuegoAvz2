@@ -36,7 +36,7 @@ class Jefe3Scene(GameScene): # Nombre de la clase para jefe_3.py
             [], # Interactables (probablemente ninguno)
             player_start, [], # Lista de enemigos inicial vacía para la superclase
             self.map_width, self.map_height,
-            next_scene_name=None # <-- FIN DEL JUEGO / VOLVER AL MENÚ PRINCIPAL
+            next_scene_name="creditos_scene" # <-- FIN DEL JUEGO / VOLVER AL MENÚ PRINCIPAL
         )
         
         self.name = "mazmorrajefe3" # Nombre de la escena
